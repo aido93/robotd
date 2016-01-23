@@ -31,96 +31,74 @@
 #include "spdlog/spdlog.h"
 #include "loader.hpp"
 
-/**
- * Для демона будет использоваться пространство имен robot, 
- * а для слэйвов - slaves
- * */
 namespace robot
 {
     /**
-     * \brief Основной класс, который предоставляет функции демонизации, 
-     * создания PID-файла, перезагрузки файла конфигурации в процессе демона,
-     * запуска и наблюдения за 'Master'-процессом.
+     * \brief Main class, that offers daemonizating method, 
+     * creating PID-file method, reloading configuration file method in the daemon process,
+     * running and monitoring of the 'Master' process method.
      * 
-     * Является шаблонным классом. В параметрах шаблона необходимо указать 
-     * список классов-наследников robot::service, которые должны работать 
-     * в 'Master'-процессе асинхронно.
+     * It is template class. In the template parameters you must specify
+     * a list of inheritors of the robot::service class, that you want to run
+     * asyncronously.
      * 
      * */
     template<class... slave> class daemon : private robot::loader
     {
         private:
         
-            /**\brief Полное имя файла, в котором содержится номер процесса (PID)*/
+            /**\brief Full filename of the PID-file*/
             const std::string   pid_file;
             
-            /**\brief Полное имя файла конфигурации*/
+            /**\brief Full name of the configuration file*/
             std::string         config;
             
-            /**\brief Результат работы Master-процесса*/
+            /**\brief Returned value of the 'Master' process*/
             int                 status;
             
-            /**\brief PID процесса*/
+            /**\brief Process ID*/
             int                 pid=0;
             
-            /**\brief Функция демонизации
-             * \return errno в случае ошибки, 0 - в случае успеха
+            /**\brief Daemonization function
+             * \return in the case of error errno returns, in the case of success - 0.
              */
             int daemonize();
             
-            /**\brief Функция создания PID-файла*/
+            /**\brief Create PID-file*/
             void set_pid_file();
         protected:
         
-            /**\brief Функция перезагрузки файла конфигурации
-             * \return Результат выполнения loader::daemon_load_config*/
+            /**\brief Reloading configuration
+             * \return The result of the loader::daemon_load_config*/
             int reload_config();
         public:
-        
-            /**\brief Конструктор по умолчанию удален, так как в любом случае 
-             * необходимо указать файл конфигурации при запуске программы.
-             * Поведение по умолчанию лучше перенести на скрипты запуска.
-             * */
+
             daemon()                      = delete;
             
-            /**\brief Конструктор копирования удален, так как неясно,
-             * куда и зачем копировать экземпляр класса daemon, 
-             * который запускается в единственном экземпляре при запуске
-             * программы.
-             * */
             daemon(const daemon &)        = delete;
             
-            /**\brief Конструктор перемещения удален, так как неясно,
-             * куда и зачем перемещать экземпляр класса daemon, 
-             * который запускается в единственном экземпляре при запуске
-             * программы.
-             * */
             daemon(daemon &&)             = delete;
             
-            /**\brief Оператор присваивания удален, так как 
-             * удалены конструкторы копирования и присваивания.
-             * */
             daemon& operator=(daemon &)   = delete;
             
-            /**\brief Конструктор
-             * \details Конструктор класса демонизации. Загружает 
-             * файл конфигурации (управление также передается 
-             * в функции static slave::load_config для загрузки 
-             * своих секций конфигурации) и демонизируется.
-             * \param config_name - имя файла конфигурации
-             * \param pid_dir - полный путь до директории, где будет находится PID-файл
-             * по умолчанию '/var/run'*/
+            /**\brief Constructor
+             * \details Load configuration (control is also passed
+             * in the static members slave::load_config of your slave classes)
+             * and demonize.
+             * \param config_name - configuration file name
+             * \param pid_dir - full path to the directory, where PID-file 
+             * will be placed '/var/run'*/
             explicit daemon(const std::string & config_name,
                              const std::string & pid_dir="/var/run");
                              
-            /**\brief Деструктор.
+            /**\brief Destructor.
              * 
-             * Удаляет PID-файл.
+             * Deletes PID-file.
              * */
             ~daemon();
             
-            /**\brief Функция наблюдения за 'Master'-процессом.
-            \return -1 в случае ошибки, 0 - в случае успеха
+            /**\brief Monitor the 'Master' process.
+            \return in the case of error -1 returns, in the case of success - 0.
             */
             int monitor_proc() throw();
     };

@@ -36,124 +36,109 @@
 
 namespace robot
 {
-/**\brief Класс, который запускается в дочернем к демону 'Master'-процессе,
-* управляет поведением классов, указанных в параметрах шаблона 'slave'. 
+/**\brief Class, that is created in the child to daemon 'Master' process,
+* manage behaviour of the classes, specified in the template parameters. 
 * */
 template<class... slave> class master : private robot::loader
 {
     private:
     
-        /**\brief Группа потоков. все потоки равноправны*/
+        /**\brief Thread group. All the threads are equal*/
         boost::thread_group tg;
         
-        /**\brief Основной объект обработки сообщений*/
+        /**\brief io_service*/
         boost::asio::io_service io_service;
         
-        /**\brief Функция, которая устанавливает максимальное допустимое количество 
-         * одновременно открытых файловых дескрипторов
+        /**\brief Set maximum count of the opened file descriptors
          * 
-         * \param [in] max_fd - максимальное количество открытых дескрипторов
-         * \return Результат выполнения setrlimit.
+         * \param [in] max_fd - maximum count of the opened file descriptors
+         * \return The result of setrlimit function.
          * */
         int set_fd_limit(const uint16_t& max_fd) const throw();
         
-        /**\brief Функция перезагрузки файлов конфигурации без перезапуска процесса*/
+        /**\brief Reload configuration file without restarting the 'Master' process*/
         int reload_config();
         
-        /**\brief Статический указатель на this. 
-         * Нужен для передачи в статическую функцию self_debug_wrapper
+        /**\brief Static pointer to this. 
+         * Needs to transfer as option in the static self_debug_wrapper method
          * */
         static master<slave...>* me;
         
-        /**\brief Обертка для функции self_debug. 
-         * Должна быть статической для того, чтобы можно было
-         * ее зарегистрировать как обработчик сигналов
+        /**\brief wrapper for the self_debug method. 
          * */
         static void self_debug_wrapper(int sig, siginfo_t *si, void *ptr);
         
-        /**\brief Функция для логгирования информации о серьезных ошибках программы.
+        /**\brief Log critical errors of the program.
          * 
-         * Если при компиляции указана опция -DDEBUG, то при любой произошедшей ошибке 
-         * выходит с кодом CHILD_NEED_TERMINATE, иначе - CHILD_NEED_WORK
-         * \param [in] sig - номер пришедшего сигнала
-         * \param [in] si  - информация о пришедшем сигнале
-         * \param [in] ptr - адрес инструкции, которая вызвала ошибку
+         * If -DDEBUG flag is set, then 'Master' process returns 
+         * CHILD_NEED_TERMINATE in the case 
+         * of critical error of any kind, else - CHILD_NEED_WORK
+         * \param [in] sig - number of the caught signal
+         * \param [in] si  - information about the caught signal
+         * \param [in] ptr - instruction address, that caused the error
          * */
         void self_debug(int sig, siginfo_t *si, void *ptr);
         
-        /**\brief Уникальный указатель на массив исполнителей задач*/
+        /**\brief Array of the unique pointers on slaves*/
         std::unique_ptr<slaves::service> slaves[sizeof...(slave)];
         
-        /**\brief Функция регистрации исполнителя T под номером I*/
+        /**\brief Register slave T*/
         template<std::size_t I, class T>
             void register_service();
         
-        /**\brief Функция регистрации всех исполнителей*/
+        /**\brief Register all slaves*/
         template<std::size_t I = 0, class Head, class... Tail>
             typename std::enable_if<I < sizeof...(slave), void>::type
             register_all_services();
         
-        /**\brief Терминирующее объявление функции регистрации всех исполнителей*/
+        /**\brief Terminal declaration of the registration method*/
         template<std::size_t I = 0, class... Tail>
             typename std::enable_if<I == sizeof...(slave), void>::type
             register_all_services()
         {}
         
-        /**\brief Функция запуска всех исполнителей*/
+        /**\brief Run all slaves*/
         void run_all_services();
         
-        /**\brief Терминирующее объявление функции обновления логгеров всех исполнителей*/
+        /**\brief Terminal declaration of the update_all_loggers method*/
         template<std::size_t I = 0>
         typename std::enable_if<I == sizeof...(slave), void>::type
             update_all_loggers() {}
         
-        /**\brief Функция обновления логгеров всех исполнителей*/
+        /**\brief Update loggers of all the slaves*/
         template<std::size_t I = 0>
             typename std::enable_if<I < sizeof...(slave), void>::type
             update_all_loggers();
         
-        /**\brief Функция обновления логгера I-го исполнителя*/
+        /**\brief Update logger of the I-th slave*/
         template<std::size_t I> 
             void update_logger();
     protected:
         
     public:
-        /**\brief Конструктор по умолчанию удален, так как в любом случае 
-        * необходимо указать тэг 'Master'-класса.
-        * */
+
         master()                      = delete;
-        /**\brief Конструктор копирования удален, так как неясно,
-        * куда и зачем копировать экземпляр класса daemon, 
-        * который запускается в единственном экземпляре.
-        * */
+
         master(const master &)        = delete;
-        /**\brief Конструктор перемещения удален, так как неясно,
-        * куда и зачем перемещать экземпляр класса daemon, 
-        * который запускается в единственном экземпляре.
-        * */
+
         master(master &&)             = delete;
-        /**\brief Оператор присваивания удален, так как 
-        * удалены конструкторы копирования и присваивания.
-        * */
+
         master& operator=( master& )  = delete;
         
-        /**\brief Единственный разрешенный конструктор
-         * \param [in] t - тэг класса. 
+        /**\brief Constructor
+         * \param [in] t - Class tag (name). 
          * */
         explicit master(const std::string & t);
         
-        /**\brief Деструктор класса
-         * 
-         * ничего не делает
+        /**\brief Destructor
          * */
         ~master(){}
         
-        /**\brief Основная рабочая функция класса. 
+        /**\brief Main working class method. 
          * 
-         * Запускает всех исполнителей, принимает все сообщения 
-         * от системы и демона и уведомляет демона о статусе завершения 'Master'-процесса.
-         * \return CHILD_NEED_TERMINATE при возникновении ошибки или приеме 
-         * сообщения о прекращении работы
+         * Run all slaves, receive all messages from the OS and from the daemon.
+         * \return Returns CHILD_NEED_TERMINATE if error occurs or if received
+         * notice of termination.
          * */
         int work_proc() throw();
 };

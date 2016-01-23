@@ -31,9 +31,9 @@
 #include <sys/stat.h>
 #include <inttypes.h>
 
-#define WRONG_OPTIONS       1 ///<возвращается, если опции указаны некорректно
-#define HELP_OPTION         2 ///<возвращается, если была передана опция help
-#define DONT_DO_ANYTHING    3 ///<возвращается, если невозможно выполнить запрошенную операцию
+#define WRONG_OPTIONS       1 ///<returns if specified incorrect option
+#define HELP_OPTION         2 ///<returns if help option is specified
+#define DONT_DO_ANYTHING    3 ///<returns if impossible to do specified option
 
 struct keys{
     const char* key;
@@ -41,9 +41,9 @@ struct keys{
 };
 
 /**
- * \brief Список опций
+ * \brief Option list
  * 
- * Список опций в формате "Имя_опции", "Требуется ли опции аргумент"
+ * Option list in the following format: "option_name", "is_option_need_value"
  * */
 const struct keys options[]=
     {
@@ -57,9 +57,9 @@ const struct keys options[]=
     };
 
 /**
- * \brief Краткая справка, которая выдается, если опции были переданы неверно
+ * \brief Short help, that showed if wrong option was specified
  * 
- * Выводит список допустимых опций и формат их использования
+ * Show list of all the options
  * */
 inline void false_parameters()
 {
@@ -83,10 +83,10 @@ inline void false_parameters()
 }
 
 /**
- * \brief Функция проверяет, возможно ли открыть файл конфигурации
- * и, в случае успеха, записывает во вспомогательный файл путь до файла конфигурации
+ * \brief Test opening configuration file. If successful, then 
+ * configuration file name is written in the auxiliary file.
  * 
- * \return В случае успеха возвращает 0, в случае ошибки - errno
+ * \return On the success returns 0. If error occurs function returns errno
  * */
 int option_load()
 {
@@ -149,7 +149,7 @@ int option_load()
 
 
 /**
- * \brief Выводит справку по программе
+ * \brief Show help
  * */
 inline void help()
 {
@@ -171,12 +171,10 @@ inline void help()
 }
 
 /**
- * \brief Функция, которая вызывается, если процесс демона не найден, 
- * но указанные пользователем опции требуют запущенного процесса и их обработать нужно
+ * \brief If daemon process isn't present in the system, then this function 
+ * must be called.
  * 
- * \param [in] argc - количество аргументов командной строки
- * \param [in] argv - указатель на массив аргументов командной строки
- * \return DONT_DO_ANYTHING или WRONG_OPTIONS
+ * \return DONT_DO_ANYTHING or WRONG_OPTIONS or 0.
  * */
 int no_daemon_process(int argc, char**argv)
 {

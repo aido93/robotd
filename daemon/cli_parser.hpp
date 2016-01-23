@@ -22,31 +22,19 @@
 #define CLI_PARSER_HPP
 
 /**
- * \brief Функция парсинга аргументов командной строки
+ * \brief Parsing command line arguments
  * 
- * Функция работает в несколько этапов:
- * \htmlonly
- * <ol>
- * <li> проверяет количество параметров</li>
- * <li> проверяет наличие временной директории конфигов</li>
- * <li> проверяет наличие PID-файла</li>
- * <li> запускает работу в соответствии с опциями</li>
- * </ol>
- * \endhtmlonly
+ * \return In the case of success 0 is returned.
+ * In the case of error errno is returned. 
+ * In the case of no error, but it doesn't need to continue process 
+ * positive value is returned.
  * 
- * \param [in] argc - Количество аргументов командной строки
- * \param [in] argv - указатель на массив аргументов командной строки
- * \return В случае успешного парсинга возвращает 0, 
- * иначе - errno в случае ошибки или положительное значение, которое 
- * свидетельствует, что ошибки не было, но продолжать работу не нужно.
- * 
- * Примеры:
+ * Examples of positive value result:
  * \htmlonly
  * <ul>
- * <li>WRONG_OPTIONS - возвращается, если опции указаны некорректно</li>
- * <li>HELP_OPTION - возвращается, если была передана опция help</li>
- * <li>DONT_DO_ANYTHING - возвращается, если невозможно выполнить 
- * запрошенную операцию, например, остановить демона, который не запущен</li>
+ * <li>WRONG_OPTIONS</li>
+ * <li>HELP_OPTION</li>
+ * <li>DONT_DO_ANYTHING</li>
  * </ul>
  * \endhtmlonly
  * */

@@ -19,41 +19,41 @@
   * Author: Diakonov Igor, 01.2016
   * */
 /**
-* \mainpage Основная информация
+* \mainpage General
 * 
-* \b robot_daemon - кроссплатформенный сетевой UNIX-демон, который может 
-* использоваться как основа для создания других демонов. Написан на C++.
+* \b robot_daemon - cross-platform UNIX-daemon, that can be used as a base 
+* for developing other daemons. Written on C++11.
 * 
-* \section license Лицензия
+* \section license License
 * \htmlonly 
-* Распространяется под лицензией GNU GPL v2, 
-* имеет в себе код, написанный под лицензией <a href=https://github.com/gabime/spdlog/blob/master/LICENSE>MIT</a> (spdlog)
-* и под лицензией <a href=http://www.boost.org/LICENSE_1_0.txt>Boost Software License - Version 1.0</a>
+* Distributed under GNU GPL v2 license, 
+* contains code, distributed under <a href=https://github.com/gabime/spdlog/blob/master/LICENSE>MIT license</a> (spdlog)
+* and under <a href=http://www.boost.org/LICENSE_1_0.txt>Boost Software License - Version 1.0</a>
 * \endhtmlonly 
 * 
-* \section arch Поддерживаемые архитектуры
+* \section arch Supported CPU architectures
 * \htmlonly 
 * <ul>
 * <li>amd64</li>
-* <li>x86 - не известно</li>
-* <li>arm - не известно</li>
+* <li>x86 - unknown</li>
+* <li>arm - unknown</li>
 * </ul>
 * \endhtmlonly 
 * 
-* \section deps Зависимости
+* \section deps Dependencies
 * \htmlonly 
 * <ul>
 * <li>git         >= 2.1.4</li>
 * <li>libconfig++ >= 9</li>
 * <li>libboost    >= 1.59</li>
 * <li>cmake       >= 3.0.2</li>
-* <li>g++         >= 4.8.2 (поддержка стандарта C++11)</li>
+* <li>g++         >= 4.8.2 (support C++11 standard)</li>
 * </ul>
 * \endhtmlonly 
-* Также поддерживается clang++ >= 3.6.0.
+* Also it may be compiled with clang++ >= 3.6.0.
 * 
 * 
-* Для создания документации:
+* These programs need to be installed to generate documentation:
 * 
 * \htmlonly 
 * <ul>
@@ -63,7 +63,7 @@
 * </ul>
 * \endhtmlonly 
 * 
-* Для документации в pdf-формате:
+* To generate documentation in the pdf-format:
 * 
 * \htmlonly
 * <ul>
@@ -71,20 +71,13 @@
 * </ul>
 * \endhtmlonly 
 * 
-* Для тестирования:
+* Older versions of the programs and libraries is not tested.
 * 
-* \htmlonly
-* <ul>
-* <li>perl        >= 5.20.2</li>
-* </ul>
-* \endhtmlonly 
-* Более старые версии программ и библиотек не протестированы.
-* 
-* \section make Компиляция и установка
+* \section make Compile and Install 
 * 
 * 1) Самая новая версия программы может быть загружена при помощи команды:
 * 
-*   <em>$ git clone https://github.com/aido93/boost_Daemon/tree/master/server</em>
+*   <em>$ git clone https://github.com/aido93/robotd</em>
 * 
 * 2) Перейдите в директорию ./server:
 * 

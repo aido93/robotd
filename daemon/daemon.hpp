@@ -26,7 +26,6 @@
 #include <string>
 #include <memory>
 #include "config.h"
-#include "protocol.hpp"
 #include "master.hpp"
 #include "spdlog/tweakme.h"
 #include "spdlog/spdlog.h"

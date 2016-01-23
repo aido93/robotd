@@ -21,7 +21,7 @@
 /**
 * \mainpage General
 * 
-* \b robot_daemon - cross-platform UNIX-daemon, that can be used as a base 
+* \b robotd - cross-platform UNIX-daemon, that can be used as a base 
 * for developing other daemons. Written on C++11.
 * 
 * \section license License
@@ -75,171 +75,163 @@
 * 
 * \section make Compile and Install 
 * 
-* 1) Самая новая версия программы может быть загружена при помощи команды:
+* 1) Last version of the robotd software can be downloaded using git:
 * 
 *   <em>$ git clone https://github.com/aido93/robotd</em>
 * 
-* 2) Перейдите в директорию ./server:
+* 2) Change directory to ./robotd:
 * 
-*   <em>$ cd ./server</em>
+*   <em>$ cd ./robotd</em>
 * 
-* 3) Сконфигурируйте проект:
+* 3) Configure robotd:
 * 
 *   <em>$ cmake .</em>
 * 
-* 4) Соберите проект:
+* 4) Build the project:
 * 
 *   <em>$ make </em>
 * 
-* \section run Запуск программы
+* \section run Run
 * 
-* По умолчанию, программа использует директории, определенные стандартом FHS
-* для сохранения логов (/var/log/) и создания временных файлов, необходимых
-* для корректной работы программы (/var/run). По этой причине программе 
-* требуются права суперпользователя. При желании, Вы можете скомпилировать
-* программу так, чтобы она не требовала доступ к вышеперечисленным директориям.
-* Как это сделать - будет рассказано в главе \ref struct.
+* By default, robotd use directories defined by the FHS:
+* for log-files (/var/log/) and for temporary files, required for correct 
+* work (/var/run). Thereat, robotd needs to be run as root. 
+* If you want, you can modify the robotd code for using other directories
+* and don't run it as root.
+* How to do that is showed in the \ref struct.
+* Below, it assumed that you prefer to run program as root.
 * 
-* Для запуска программы наберите в терминале:
+* To run robotd type this command in terminal:
 * 
-* <em>$ sudo ./robot_daemon load cfg/daemon.cfg</em>
+* <em>$ sudo ./robotd load cfg/daemon.cfg</em>
 * 
-* Будет загружен стандартный файл конфигурации, который находится в директории ./cfg/
+* This command tells to the program to load standard configuration file, 
+* that placed in the ./cfg/ directory.
 * 
-* Для остановки программы:
+* To stop robotd:
 * 
-* <em>$ sudo ./robot_daemon stop</em>
+* <em>$ sudo ./robotd stop</em>
 * 
-* Запускать программу напрямую от суперпользователя или через sudo - 
-* личный выбор каждого. Более интересны на данный момент поддерживаемые 
-* опции запуска. Их можно вывести при помощи команды help:
+* If you want to see other options, you can type:
 * 
+* <em>$ ./robotd help</em>
 * 
-* <em>$ sudo ./robot_daemon help</em>
-* \htmlonly
-* robot_daemon 1.0 <br>
-* Usage: robot_daemon  &ltoption&gt <br><br>
-* Options: <br>
-* load [filename.cfg] <br>
-* reload <br>
-* restart <br>
-* stop <br>
-* status <br>
-* help
+* \htmlonly &ltoption&gt
+* robotd 1.0 - cross-platform UNIX daemonized server. <br>
+* License GNU GPLv2 &lthttp://www.gnu.org/licenses/old-licenses/gpl-2.0.html&gt<br>
+* This program can be used for development your own daemon.<br>
+* This is free software: you are free to change and redistribute it.<br>
+* There is NO WARRANTY, to the extent permitted by law.<br>
+* Written by Igor Diakonov. Compiled 23.01.2016.<br>
+* <br><br>
+* Usage: robotd <option><br><br>
+* 
+* Options:<br>
+*	help                  show this message<br>
+*	load [filename.cfg]   run daemon with configuration loaded from filename.cfg.<br>
+*	                      Note: It can be only one copy of the daemon run in the system.<br>
+*	reload                reload configuration file without stopping daemon.<br>
+*	stop                  terminate daemon.<br>
+*	restart               restart daemon with the same configuration.<br>
+*	status                show status of the daemon. If daemon is run you will see its PID.
 * \endhtmlonly
 * 
-* Как видно, только опция 'load' имеет параметр - имя файла конфигурации.
-* Поддерживаются как полные имена, так и относительные.
+* As we can see, 'load' option requires one parameter - the name of the configuration file.
+* It supports as full filenames or relative filenames.
 * 
-* Остальные опции служат:
-* \htmlonly
-* <ul>
-* <li>reload  - для перезагрузки файла конфигурации без остановки работы демона.</li>
-* <li>restart - для перезапуска демона и перезагрузки файла конфигурации.</li>
-* <li>stop    - для завершения работы демона.</li>
-* <li>status  - для получения статуса (работает/не работает) демона. В случае,
-* если демон запущен, команда выведет на экран PID процесса демона.</li>
-* 
-* <li>help    - для вывода справки.</li>
-* </ul>
-* \endhtmlonly
-* 
-* \author Дьяконов Игорь
-* \date 20.01.2016
+* \author Diakonov Igor
+* \date 23.01.2016
 */
 
-/**\page struct Структура программы
- * Программа разделена на несколько логических частей
+/**\page struct robotd structure
+ * Program is divided on the six logical parts: 
  * \htmlonly
  * <ul>
- * <li>Парсер аргументов командной строки. 
- * Расположен в файлах daemon/cli_parser.hpp, daemon/cli_parser.cpp</li>
+ * <li>Command line arguments parser. 
+ * It is located in daemon/cli_parser.hpp, daemon/cli_parser.cpp</li>
  * 
- * <li>Класс загрузчика конфигурации robot::loader. 
- * Распложен в loader/loader.hpp, loader/loader_impl.hpp</li>
+ * <li>Configuration loader class robot::loader. 
+ * It is located in loader/loader.hpp, loader/loader_impl.hpp</li>
  * 
- * <li>Класс демона robot::daemon. 
- * Расположен в файлах daemon/daemon.hpp, daemon/daemon_mpl.hpp</li>
+ * <li>Daemon class robot::daemon. 
+ * It is located in daemon/daemon.hpp, daemon/daemon_mpl.hpp</li>
  * 
- * <li>Класс мастер-процесса robot::master. 
- * Расположен в файлах daemon/master.hpp, daemon/master_impl.hpp</li>
+ * <li>'Master'-process class robot::master. 
+ * It is located in daemon/master.hpp, daemon/master_impl.hpp</li>
  * 
- * <li>Абстрактный класс robot::service. 
- * Расположен в файле daemon/service.hpp</li>
+ * <li>Base class for all slaves robot::service. 
+ * It is located in daemon/service.hpp</li>
  * 
- * <li>Запускаемые асинхронно обработчики входящих сообщений. 
- * Пока поддерживается только сетевой протокол TCP и 
- * соответствующие файлы находятся в директории nets</li>
+ * <li>Asynchronous handlers for the incomming messages. 
+ * It is located in slaves directory</li>
  * </ul>
  * \endhtmlonly
  * 
- * Порядок создания классов следующий:
- * Сначала происходит парсинг аргументов командной строки и если все прошло успешно,
- * то создается класс robot::daemon, который занимается чтением файла конфигурации,
- * передает управление в функции load_config классов обработчиков входных сообщений
- * и создает в дочернем процессе класс master.
+ * The order of class creation:
  * 
- * Класс robot::master создает указанное в файле конфигурации количество потоков,
- * запускает асинхронно при помощи boost::asio::io_service все обработчики 
- * входящих сообщений, именуемые в дальнейшем слэйвами (от англ. slave).
+ * First occurs parsing of the command line arguments and, if parsing was successful,
+ * then the robot::daemon class is created. This class reads configuration file and 
+ * transfers control to the load_config functions of the 'slave' classes and 
+ * creates robot::master class in the child process.
  * 
- * Класс robot::service является расширением над boost::asio::io_service::service
- * и позволяет слэйвам логгировать свои операции в указанный в файле конфигурации лог-файл.
+ * The robot::master class runs number of threads, specified in the configuration file
+ * and asyncronously runs all handlers of incoming messages using the boost::asio::io_service.
  * 
- * Классы robot::master и robot::daemon являются наследниками класса robot::loader,
- * так как загрузка и перезагрузка файла конфигурации - по факту почти одна и та же задача.
+ * The robot::service class is the extension over boost::asio::io_service::service
+ * and allows 'slave' classes to log operations in the log-file specified in configuration.
  * 
- * <b>Информация для разработчиков и используемые соглашения</b>
+ * The robot::master class and the robot::daemon class is inherited from the robot::loader class,
+ * because loading and reloading configuration file in fact is the same operation.
  * 
- * Так как невозможно отлаживать демона в gdb (родительский процесс сразу завершается),
- * то выход остается один - включить полное логгирование действий, 
- * выполняемых программой. Для этого в файле CMakeLists.txt служит 
- * опция CMAKE_CXX_FLAGS. Для включения ПОЛНОГО логгирования добавьте в нее
- * опцию -DTRACE. Для того, чтобы программа завершалась при любой серьезной ошибке,
- * добавьте в CMAKE_CXX_FLAGS опцию -DDEBUG. Стоит отметить, что сообщения 
- * с уровнем логгирования trace будут выводиться только в том случае, если
- * программа скомпилирована с флагом -DTRACE.
+ * <b>Information for developers and used agreements</b>
  * 
- * Каждый класс должен иметь свой \b тэг - имя класса, используемое при логгировании.
+ * Because it is impossible to debug daemon using gdb debugger 
+ * (parent process terminates earlier than child process),
+ * I recommend to turn on full logging mode including all error messages from the OS.
+ * For this it needs to add -DTRACE flag in the CMAKE_CXX_FLAGS option 
+ * of the CMakeLists.txt file.
+ * If you want the program terminates when any severe error occurs, 
+ * just add the -DDEBUG flag in the CMAKE_CXX_FLAGS option.
+ * It is worth noting, that messages with severe level 'trace' is logged 
+ * only if the program is build with -DTRACE flag.
  * 
- * Логгирование происходит в т.н. \b слив (от англ. sink).
+ * Each class must have its own \b tag - name of the class using for logging.
  * 
- * В случае, если Вы хотите использовать логгирование в собственном slave-классе, 
- * отнаследуйтесь от robot::service и используйте следующий синтаксис:
+ * All slave classes must be inherited from slaves::service.
+ * To log your message into the sink you shalluse this syntax:
  * 
  * \code
- * //Для подробного логгирования.
- * //Помните, функция log->trace должна использоваться ТОЛЬКО в таком виде.
+ * //For full logging
  * #ifdef TRACE
         log->trace("Acceptor {} is ready to async accept",num);
    #endif
  * 
- * //для debug-сообщений.
+ * //for debug messages.
  * log->debug("Debug message");
  * 
- * //для info-сообщений.
+ * //for info messages.
  * log->info("Info message");
  * 
- * //для warning-сообщений.
+ * //for warning messages.
  * log->warn("Warning message");
  * 
- * //для error-сообщений.
+ * //for error messages.
  * log->error("Error message");
  * \endcode
  * 
- * Более подробную информацию вы найдете на сайте https://github.com/gabime/spdlog/wiki .
+ * For more information, please visit https://github.com/gabime/spdlog/wiki .
  * 
- * Для включения ваших слэйвов в список загружаемых, просто добавьте их в параметры
- * шаблона daemon через запятую, как показано в файле server_main.cpp:
+ * For including your 'slave' classes in the load list just add them
+ * in the template parameters as showed in the server_main.cpp file:
  * \code
  * robot::daemon<robot::tcp_server> robot_daemon(CONFIG_FILE);
  * \endcode
  * 
- * В примере выше только класс robot::tcp_server требуется демонизировать.
+ *In the example above only the robot::tcp_server class will be daemonized.
  * 
- * <b>СОГЛАШЕНИЕ 1</b>:
+ * <b>Agreement 1</b>:
  * 
- * Каждый слэйв должен иметь статическую функцию load_config в public-области:
+ * Each slave must have static load_config member in the public field:
  * 
  * \code
  * public:
@@ -248,50 +240,28 @@
                             bool to_file);
  * \endcode
  * 
- * Для того, чтобы написать свою load_config-функцию, прочтите документацию на
- * robot::tcp_server::load_config и посмотрите ее реализацию в файле nets/tcp_server.cpp.
- * Более подробная информация по синтаксису файла конфигурации находится 
- * на сайте http://www.hyperrealm.com/libconfig/libconfig_manual.html#The-C_002b_002b-API
+ * In order to write your own load_config class member,read the documentation on the
+ * robot::tcp_server::load_config class member and look at its realization 
+ * in the nets/tcp_server.cpp file.
+ * For more information on syntax of the configuration file, 
+ * please visit http://www.hyperrealm.com/libconfig/libconfig_manual.html#The-C_002b_002b-API
  * 
- * Для большинства задач, которые будет решать Ваш слэйв, прекрасно подходит
- * event-driven модель, которая реализована в библиотеке boost::asio. 
- * Подробную информацию об этой библиотеке вы найдете здесь:
+ * For most tasks, that your 'slave' class solves, event-driven model is perfectly suitable, 
+ * that is realized in the boost::asio library. 
+ * For more information on this library, please visit
  * http://www.boost.org/doc/libs/1_59_0/doc/html/boost_asio.html . 
- * Также Вы можете посмотреть, как реализована ее поддержка в классе robot::tcp_server.
+ * Also you can see, how it is realized in the robot::tcp_server class.
  * 
- * <b>СОГЛАШЕНИЕ 2.1</b>:
+ * <b>Agreement 2</b>:
  * 
- * Пишите имена всех классов, функций и переменных без использования заглавных букв.
- * Разрешается использовать подчеркивания, цифры используйте в самом крайнем случае.
- * 
- * <b>СОГЛАШЕНИЕ 2.2</b>:
- * 
- * Отступ слева должен быть равен 4 пробелам. Старайтесь писать код так, 
- * чтобы он умещался в строки, длиной 100 символов.
- * 
- * <b>СОГЛАШЕНИЕ 2.3</b>:
- * 
- * В файлах с объявлениями классов, функций, переменных, директив 
- * комментарии оформляются в doxygen-формате,
- * перед объявлением соответствующей сущности. Перед комментарием должна быть
- * одна пустая строка. В файлах с реализациями классов и функций используйте 
- * комментарии в не-doxygen-формате только там, где без них тяжело понять код.
- * Старайтесь писать понятный без комментариев код. Не используйте в именах
- * транслитерированные названия.
- * 
- * <b>СОГЛАШЕНИЕ 2.4</b>:
- * 
- * Код должен быть написан в соответствии со стандартами SEI CERT, POSIX.
- * Его описание Вы найдете здесь: https://securecoding.cert.org/confluence/pages/viewpage.action?pageId=637
+ * Code must conform the SEI CERT standard.
+ * For more information on this standard, please visit: https://securecoding.cert.org/confluence/pages/viewpage.action?pageId=637
  * 
  * */
  
 /**
  * \file
- * \brief Основной файл сервера.
- * \details Содержит функцию main, в которой вызывается ParseOptions 
- * для распознания опций командной строки. Если опции были распознаны 
- * и все было успешно, то дальше создается демонизированный сервер.
+ * \brief Main file of the robotd daemon.
  * */
 #include <boost/asio.hpp>
 #include "daemon.hpp"
@@ -304,7 +274,7 @@
 int main(int argc, char** argv)
 {
     int ret=parse_options(argc, argv);
-    // если что-то не так, то выходим.
+    // if something was wrong, then exit
     if(ret<0)
     {
         return EXIT_FAILURE;
@@ -313,8 +283,7 @@ int main(int argc, char** argv)
     {
         return EXIT_SUCCESS;
     }
-    // все так
-    // каждый класс в параметрах шаблона должен содержать static load_config
+
     robot::daemon<slaves::tcp_server> robot_daemon(CONFIG_FILE);
     robot_daemon.monitor_proc();
 }
